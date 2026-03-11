@@ -1,0 +1,419 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  User, 
+  Lock, 
+  Search, 
+  PlusCircle, 
+  History, 
+  CreditCard, 
+  Settings, 
+  LogOut, 
+  Facebook, 
+  Youtube, 
+  ShoppingBag, 
+  MessageCircle,
+  Bell,
+  CheckCircle,
+  XCircle,
+  Copy,
+  LayoutDashboard,
+  ShieldCheck,
+  TrendingUp,
+  Cpu,
+  Smartphone
+} from 'lucide-react';
+
+const App = () => {
+  const [page, setPage] = useState('landing'); // landing, auth, dashboard
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [user, setUser] = useState(null);
+  const [isLogin, setIsLogin] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMsg, setNotificationMsg] = useState("");
+
+  // Mock Data
+  const services = [
+    { id: 1, platform: 'Facebook', type: 'Followers', price: '50đ', speed: 'Nhanh', min: 100 },
+    { id: 2, platform: 'Facebook', type: 'Like Post', price: '20đ', speed: 'Ổn định', min: 50 },
+    { id: 3, platform: 'TikTok', type: 'Followers', price: '80đ', speed: 'Tức thì', min: 100 },
+    { id: 4, platform: 'TikTok', type: 'View Video', price: '5đ', speed: 'Cực nhanh', min: 1000 },
+    { id: 5, platform: 'YouTube', type: 'Subscribers', price: '450đ', speed: 'An toàn', min: 100 },
+    { id: 6, platform: 'Shopee', type: 'Followers', price: '120đ', speed: 'Ổn định', min: 100 },
+  ];
+
+  const recentActivities = [
+    { id: '12345', user: 'huy_admin', service: 'TikTok Follow', amount: '1,000', status: 'Running' },
+    { id: '12346', user: 'customer_01', service: 'FB Like', amount: '5,000', status: 'Completed' },
+    { id: '12347', user: 'nguyen_van_a', service: 'YT Sub', amount: '100', status: 'Pending' },
+  ];
+
+  const notify = (msg) => {
+    setNotificationMsg(msg);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
+  };
+
+  // --- Components ---
+
+  const Navbar = () => (
+    <nav className="flex items-center justify-between p-4 bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
+      <div className="flex items-center space-x-2">
+        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white italic">HH</div>
+        <span className="text-xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          hoanghuy61.com
+        </span>
+      </div>
+      <div className="flex items-center space-x-4">
+        {user ? (
+          <>
+            <div className="hidden md:block text-right mr-2">
+              <p className="text-sm font-bold text-white">{user.username}</p>
+              <p className="text-xs text-green-400 font-medium">Số dư: 500,000đ</p>
+            </div>
+            <button onClick={() => setPage('dashboard')} className="p-2 hover:bg-gray-800 rounded-full text-gray-400">
+              <Bell size={20} />
+            </button>
+            <button onClick={() => { setUser(null); setPage('landing'); }} className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-full transition-all">
+              <LogOut size={20} />
+            </button>
+          </>
+        ) : (
+          <button 
+            onClick={() => setPage('auth')}
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all shadow-lg shadow-blue-500/20"
+          >
+            Đăng Nhập
+          </button>
+        )}
+      </div>
+    </nav>
+  );
+
+  const Sidebar = () => (
+    <aside className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col h-[calc(100vh-73px)]">
+      <div className="p-4 flex-1 space-y-2 overflow-y-auto">
+        <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-all ${activeTab === 'dashboard' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-800'}`}>
+          <LayoutDashboard size={20} /> <span>Trang chủ</span>
+        </button>
+        <button onClick={() => setActiveTab('order')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-all ${activeTab === 'order' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-800'}`}>
+          <PlusCircle size={20} /> <span>Tạo đơn mới</span>
+        </button>
+        <button onClick={() => setActiveTab('history')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-all ${activeTab === 'history' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-800'}`}>
+          <History size={20} /> <span>Lịch sử buff</span>
+        </button>
+        <button onClick={() => setActiveTab('deposit')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-all ${activeTab === 'deposit' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-800'}`}>
+          <CreditCard size={20} /> <span>Nạp tiền</span>
+        </button>
+        <button onClick={() => setActiveTab('api')} className={`w-full flex items-center space-x-3 p-3 rounded-xl transition-all ${activeTab === 'api' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-800'}`}>
+          <Cpu size={20} /> <span>Kết nối API</span>
+        </button>
+        <div className="pt-4 border-t border-gray-800 mt-4">
+          <p className="px-3 text-xs font-bold text-gray-500 uppercase mb-2">Hỗ trợ</p>
+          <button className="w-full flex items-center space-x-3 p-3 text-gray-400 hover:bg-gray-800 rounded-xl">
+            <MessageCircle size={20} /> <span>Báo cáo lỗi</span>
+          </button>
+        </div>
+      </div>
+      <div className="p-4 border-t border-gray-800 text-center text-xs text-gray-500">
+        © 2024 hoanghuy61.com
+      </div>
+    </aside>
+  );
+
+  const AuthPage = () => {
+    const [cardCode, setCardCode] = useState("");
+    const [cardSeri, setCardSeri] = useState("");
+
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-gray-900 border border-gray-800 rounded-3xl p-8 shadow-2xl">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-extrabold text-white mb-2">{isLogin ? 'Chào mừng trở lại' : 'Đăng ký tài khoản'}</h2>
+            <p className="text-gray-400">Giao dịch an toàn - Nhanh chóng - Bảo mật</p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="relative">
+              <User className="absolute left-3 top-3.5 text-gray-500" size={18} />
+              <input type="text" placeholder="Tên đăng nhập" className="w-full bg-gray-800 border border-gray-700 text-white px-10 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div className="relative">
+              <Lock className="absolute left-3 top-3.5 text-gray-500" size={18} />
+              <input type="password" placeholder="Mật khẩu" className="w-full bg-gray-800 border border-gray-700 text-white px-10 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            {!isLogin && (
+               <div className="relative">
+               <Lock className="absolute left-3 top-3.5 text-gray-500" size={18} />
+               <input type="password" placeholder="Nhập lại mật khẩu" className="w-full bg-gray-800 border border-gray-700 text-white px-10 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+             </div>
+            )}
+
+            {isLogin && (
+              <div className="flex justify-between items-center text-sm">
+                <label className="flex items-center text-gray-400"><input type="checkbox" className="mr-2" /> Ghi nhớ</label>
+                <button className="text-blue-500 font-medium hover:underline">Quên mật khẩu?</button>
+              </div>
+            )}
+
+            <button 
+              onClick={() => { setUser({username: 'Huy VO'}); setPage('dashboard'); }}
+              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg"
+            >
+              {isLogin ? 'ĐĂNG NHẬP NGAY' : 'TẠO TÀI KHOẢN'}
+            </button>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-800"></div></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-gray-900 px-2 text-gray-500">Hoặc tiếp tục với</span></div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <button className="flex items-center justify-center space-x-2 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-all">
+                <span>Google</span>
+              </button>
+              <button className="flex items-center justify-center space-x-2 py-3 bg-gray-700 text-white font-bold rounded-xl hover:bg-gray-600 transition-all">
+                <span>Apple</span>
+              </button>
+            </div>
+
+            <p className="text-center text-gray-400 mt-6">
+              {isLogin ? "Chưa có tài khoản?" : "Đã có tài khoản?"} 
+              <button onClick={() => setIsLogin(!isLogin)} className="text-blue-500 ml-1 font-bold hover:underline">
+                {isLogin ? "Đăng ký ngay" : "Đăng nhập"}
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const DepositSection = () => {
+    const [cardType, setCardType] = useState("Viettel");
+    const [amount, setAmount] = useState("10000");
+    const [seri, setSeri] = useState("");
+    const [code, setCode] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [status, setStatus] = useState(null);
+
+    const handleCharge = () => {
+      if (!seri || !code) {
+        notify("Vui lòng nhập đầy đủ Seri và Mã thẻ!");
+        return;
+      }
+      setIsSubmitting(true);
+      // Simulate API call
+      setTimeout(() => {
+        setIsSubmitting(false);
+        setStatus('pending');
+        notify("Thẻ của bạn đang được duyệt!");
+      }, 1500);
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Bank Info */}
+          <div className="bg-gray-800/50 p-6 rounded-2xl border border-blue-500/30">
+            <h3 className="text-xl font-bold mb-4 flex items-center text-blue-400">
+              <CreditCard className="mr-2" /> Chuyển khoản ngân hàng
+            </h3>
+            <div className="space-y-4 bg-gray-900 p-4 rounded-xl">
+              <div className="flex justify-between items-center border-b border-gray-800 pb-2">
+                <span className="text-gray-400">Ngân hàng</span>
+                <span className="text-white font-bold">MB BANK</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-gray-800 pb-2">
+                <span className="text-gray-400">Chủ TK</span>
+                <span className="text-white font-bold">VO HOANG HUY</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-gray-800 pb-2">
+                <span className="text-gray-400">Số TK</span>
+                <span className="text-blue-400 font-bold flex items-center gap-2">
+                  0383603589 <Copy size={14} className="cursor-pointer" />
+                </span>
+              </div>
+              <div className="bg-blue-600/10 p-3 rounded-lg text-xs text-blue-300">
+                Nội dung chuyển khoản: <span className="font-mono font-bold">NAP TIEN {user?.username || 'USER'}</span>
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-gray-500 italic">* Hệ thống sẽ tự động cộng tiền sau 1-3 phút chuyển khoản thành công.</p>
+          </div>
+
+          {/* Card Charge */}
+          <div className="bg-gray-800/50 p-6 rounded-2xl border border-purple-500/30">
+            <h3 className="text-xl font-bold mb-4 flex items-center text-purple-400">
+              <Smartphone className="mr-2" /> Nạp thẻ cào (Auto)
+            </h3>
+            <div className="space-y-4">
+              <select 
+                className="w-full bg-gray-900 border border-gray-700 text-white p-3 rounded-xl outline-none"
+                value={cardType}
+                onChange={(e) => setCardType(e.target.value)}
+              >
+                <option>Viettel</option>
+                <option>Mobifone</option>
+                <option>Vinaphone</option>
+                <option>Zing</option>
+              </select>
+              <select 
+                className="w-full bg-gray-900 border border-gray-700 text-white p-3 rounded-xl outline-none"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              >
+                <option value="10000">10,000đ</option>
+                <option value="20000">20,000đ</option>
+                <option value="50000">50,000đ</option>
+                <option value="100000">100,000đ</option>
+                <option value="200000">200,000đ</option>
+                <option value="500000">500,000đ</option>
+              </select>
+              <input 
+                type="text" 
+                placeholder="Nhập số Seri" 
+                className="w-full bg-gray-900 border border-gray-700 text-white p-3 rounded-xl outline-none"
+                value={seri}
+                onChange={(e) => setSeri(e.target.value)}
+              />
+              <input 
+                type="text" 
+                placeholder="Nhập mã thẻ" 
+                className="w-full bg-gray-900 border border-gray-700 text-white p-3 rounded-xl outline-none"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+              />
+              <button 
+                onClick={handleCharge}
+                disabled={isSubmitting}
+                className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-all shadow-lg flex items-center justify-center"
+              >
+                {isSubmitting ? "Đang gửi dữ liệu..." : "NẠP NGAY"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {status === 'pending' && (
+          <div className="bg-yellow-500/10 border border-yellow-500/50 p-4 rounded-xl flex items-center space-x-3 text-yellow-500">
+            <TrendingUp size={24} className="animate-pulse" />
+            <div>
+              <p className="font-bold">Đơn nạp thẻ đang chờ xử lý!</p>
+              <p className="text-sm opacity-80">Mã thẻ: {code.slice(0, 4)}**** - Mệnh giá: {amount}đ. Vui lòng đợi trong giây lát.</p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const ServiceTable = () => (
+    <div className="overflow-x-auto bg-gray-900 rounded-2xl border border-gray-800">
+      <table className="w-full text-left">
+        <thead>
+          <tr className="bg-gray-800/50">
+            <th className="p-4 text-gray-400 font-semibold">Dịch vụ</th>
+            <th className="p-4 text-gray-400 font-semibold">Giá (1 đơn vị)</th>
+            <th className="p-4 text-gray-400 font-semibold">Tốc độ</th>
+            <th className="p-4 text-gray-400 font-semibold">Tối thiểu</th>
+            <th className="p-4"></th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-800">
+          {services.map((s) => (
+            <tr key={s.id} className="hover:bg-gray-800/30 transition-colors">
+              <td className="p-4">
+                <div className="flex items-center space-x-3">
+                  {s.platform === 'Facebook' && <Facebook size={20} className="text-blue-500" />}
+                  {s.platform === 'TikTok' && <span className="text-xl">🎵</span>}
+                  {s.platform === 'YouTube' && <Youtube size={20} className="text-red-500" />}
+                  {s.platform === 'Shopee' && <ShoppingBag size={20} className="text-orange-500" />}
+                  <div>
+                    <p className="font-bold text-white">{s.platform}</p>
+                    <p className="text-xs text-gray-500">{s.type}</p>
+                  </div>
+                </div>
+              </td>
+              <td className="p-4 font-mono text-green-400 font-bold">{s.price}</td>
+              <td className="p-4">
+                <span className="px-2 py-1 bg-blue-500/10 text-blue-400 text-xs rounded-full border border-blue-500/30">
+                  {s.speed}
+                </span>
+              </td>
+              <td className="p-4 text-gray-400">{s.min}</td>
+              <td className="p-4 text-right">
+                <button onClick={() => notify("Vui lòng chọn link cần buff!")} className="px-4 py-2 bg-gray-800 hover:bg-blue-600 text-white rounded-lg transition-all text-sm font-bold">
+                  Chọn
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const APISection = () => (
+    <div className="bg-gray-900 p-8 rounded-2xl border border-gray-800 max-w-2xl mx-auto shadow-2xl">
+      <div className="flex items-center space-x-4 mb-6">
+        <div className="p-3 bg-blue-600/10 text-blue-500 rounded-2xl"><Cpu size={32} /></div>
+        <div>
+          <h2 className="text-2xl font-bold text-white">Kết nối API của bạn</h2>
+          <p className="text-gray-400">Sử dụng API để tích hợp dịch vụ của chúng tôi vào website của bạn.</p>
+        </div>
+      </div>
+      <div className="space-y-4">
+        <label className="text-sm font-bold text-gray-500 uppercase">API Key (Cá nhân)</label>
+        <div className="flex space-x-2">
+          <input 
+            type="text" 
+            readOnly 
+            value="hh61_api_889922_xxxx_yyyy_zzzz" 
+            className="flex-1 bg-gray-800 border border-gray-700 text-blue-300 font-mono p-4 rounded-xl outline-none"
+          />
+          <button className="bg-gray-800 p-4 rounded-xl hover:bg-gray-700 text-white transition-all">
+            <Copy size={20} />
+          </button>
+        </div>
+        <button className="w-full py-3 border border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all font-bold">
+          LÀM MỚI API KEY
+        </button>
+      </div>
+    </div>
+  );
+
+  const HistorySection = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-white">Lịch sử đơn hàng</h2>
+      <div className="grid grid-cols-1 gap-4">
+        {recentActivities.map((order) => (
+          <div key={order.id} className="bg-gray-900 p-5 rounded-2xl border border-gray-800 flex items-center justify-between hover:border-gray-700 transition-all">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center font-bold text-blue-500">#{order.id.slice(-4)}</div>
+              <div>
+                <p className="text-white font-bold">{order.service}</p>
+                <p className="text-sm text-gray-500">Số lượng: {order.amount}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                order.status === 'Completed' ? 'bg-green-500/10 text-green-500 border border-green-500/30' : 
+                order.status === 'Running' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/30' :
+                'bg-yellow-500/10 text-yellow-500 border border-yellow-500/30'
+              }`}>
+                {order.status === 'Completed' ? 'Hoàn thành' : order.status === 'Running' ? 'Đang chạy' : 'Đang xử lý'}
+              </span>
+              <p className="text-xs text-gray-600 mt-2">Ngày: 11/10/2024</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // --- Main Render ---
+
+  if (page === 'auth') return <AuthPage />;
+
+  return (
+    <div className={`min-h-screen ${isDarkMode ? 'bg-black text-wh
